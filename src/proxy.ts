@@ -15,3 +15,7 @@ export function proxy(request: NextRequest) {
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ['/dashboard/:path*', '/services/add/:path*', '/services/manage/:path*', '/ai/assistant/:path*', '/profile/:path*'],
+};
