@@ -66,10 +66,13 @@ export const authApi = baseApi.injectEndpoints({
       query: () => '/auth/me',
       transformResponse: (response: any) => response.user,
       providesTags: ['Auth'],
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, getState, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setUser(data));
+          const state: any = getState();
+          if (data || !state.auth.isAuthenticated) {
+            dispatch(setUser(data));
+          }
         } catch { }
       },
     }),
