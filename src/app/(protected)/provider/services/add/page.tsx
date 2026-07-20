@@ -1,54 +1,55 @@
-'use client';
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Button from '@/components/ui/Button';
-import Skeleton from '@/components/ui/Skeleton';
-import Input from '@/components/ui/Input';
-import Select from '@/components/ui/Select';
-import { showToast } from '@/lib/utils';
-import ContentGeneratorModal from '@/components/ai/ContentGeneratorModal';
+"use client";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import { showToast } from "@/lib/utils";
+import ContentGeneratorModal from "@/components/ai/ContentGeneratorModal";
 import {
   useCreateServiceMutation,
   useUpdateServiceMutation,
   useGetServiceByIdQuery,
-} from '@/store/api/servicesApi';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+} from "@/store/api/servicesApi";
+import { SparklesIcon } from "@heroicons/react/24/outline";
 
 const CATEGORIES = [
-  'Home Repair',
-  'Tutoring',
-  'Design & Creative',
-  'Fitness & Health',
-  'Cleaning',
+  "Home Repair",
+  "Tutoring",
+  "Design & Creative",
+  "Fitness & Health",
+  "Cleaning",
 ];
 
 function AddServiceForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const serviceId = searchParams.get('id');
+  const serviceId = searchParams.get("id");
 
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [imageUrls, setImageUrls] = useState<string[]>(['']);
+  const [imageUrls, setImageUrls] = useState<string[]>([""]);
 
   const [form, setForm] = useState({
-    title: '',
-    shortDescription: '',
-    fullDescription: '',
-    category: '',
-    price: '',
-    priceUnit: 'fixed',
-    location: '',
-    city: '',
-    tags: '',
-    availability: '',
+    title: "",
+    shortDescription: "",
+    fullDescription: "",
+    category: "",
+    price: "",
+    priceUnit: "fixed",
+    location: "",
+    city: "",
+    tags: "",
+    availability: "",
   });
 
   // Queries & Mutations
-  const { data: serviceData, isLoading: isFetchingService } = useGetServiceByIdQuery(serviceId!, {
-    skip: !serviceId,
-  });
+  const { data: serviceData, isLoading: isFetchingService } =
+    useGetServiceByIdQuery(serviceId!, {
+      skip: !serviceId,
+    });
 
   const [createService] = useCreateServiceMutation();
   const [updateService] = useUpdateServiceMutation();
@@ -58,33 +59,38 @@ function AddServiceForm() {
     if (serviceData?.service) {
       const s = serviceData.service;
       setForm({
-        title: s.title || '',
-        shortDescription: s.shortDescription || '',
-        fullDescription: s.fullDescription || '',
-        category: s.category || '',
-        price: s.price ? s.price.toString() : '',
-        priceUnit: s.priceUnit || 'fixed',
-        location: s.location || '',
-        city: s.city || '',
-        tags: s.tags ? s.tags.join(', ') : '',
-        availability: s.availability || '',
+        title: s.title || "",
+        shortDescription: s.shortDescription || "",
+        fullDescription: s.fullDescription || "",
+        category: s.category || "",
+        price: s.price ? s.price.toString() : "",
+        priceUnit: s.priceUnit || "fixed",
+        location: s.location || "",
+        city: s.city || "",
+        tags: s.tags ? s.tags.join(", ") : "",
+        availability: s.availability || "",
       });
     }
   }, [serviceData]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleUseAiDraft = (shortDescription: string, fullDescription: string) => {
+  const handleUseAiDraft = (
+    shortDescription: string,
+    fullDescription: string,
+  ) => {
     setForm((prev) => ({
       ...prev,
       shortDescription,
       fullDescription,
     }));
-    showToast.success('AI description draft applied!');
+    showToast.success("AI description draft applied!");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +98,10 @@ function AddServiceForm() {
     setLoading(true);
 
     const tagsArray = form.tags
-      ? form.tags.split(',').map((t) => t.trim()).filter(Boolean)
+      ? form.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
       : [];
 
     const payload = {
@@ -101,7 +110,7 @@ function AddServiceForm() {
       fullDescription: form.fullDescription,
       category: form.category,
       price: parseFloat(form.price),
-      priceUnit: form.priceUnit as 'fixed' | 'per_hour',
+      priceUnit: form.priceUnit as "fixed" | "per_hour",
       location: form.location,
       city: form.city,
       tags: tagsArray,
@@ -113,15 +122,15 @@ function AddServiceForm() {
       if (serviceId) {
         // Edit service listing
         await updateService({ id: serviceId, ...payload }).unwrap();
-        showToast.success('Service updated successfully!');
+        showToast.success("Service updated successfully!");
       } else {
         // Create service listing
         await createService(payload).unwrap();
-        showToast.success('Service listed successfully!');
+        showToast.success("Service listed successfully!");
       }
-      router.push('/services/manage');
+      router.push("/provider/services/manage");
     } catch (err: any) {
-      showToast.error(err?.data?.message || 'Failed to submit service');
+      showToast.error(err?.data?.message || "Failed to submit service");
     } finally {
       setLoading(false);
     }
@@ -140,7 +149,7 @@ function AddServiceForm() {
     <main className="mx-auto max-w-3xl space-y-8 p-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 font-display">
-          {serviceId ? 'Edit Your Service' : 'List a Service'}
+          {serviceId ? "Edit Your Service" : "List a Service"}
         </h1>
         <Button
           type="button"
@@ -153,7 +162,10 @@ function AddServiceForm() {
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6 rounded-2xl bg-white p-8 shadow-sm border border-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 rounded-2xl bg-white p-8 shadow-sm border border-gray-100"
+      >
         <Input
           label="Title"
           name="title"
@@ -164,7 +176,9 @@ function AddServiceForm() {
         />
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Short Description</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Short Description
+          </label>
           <textarea
             name="shortDescription"
             value={form.shortDescription}
@@ -177,7 +191,9 @@ function AddServiceForm() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Full Description</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Full Description
+          </label>
           <textarea
             name="fullDescription"
             value={form.fullDescription}
@@ -215,8 +231,8 @@ function AddServiceForm() {
             value={form.priceUnit}
             onChange={handleChange}
             options={[
-              { value: 'fixed', label: 'Fixed Price' },
-              { value: 'per_hour', label: 'Per Hour' },
+              { value: "fixed", label: "Fixed Price" },
+              { value: "per_hour", label: "Per Hour" },
             ]}
           />
         </div>
@@ -239,7 +255,9 @@ function AddServiceForm() {
         </div>
 
         <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">Service Images (URLs)</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Service Images (URLs)
+          </label>
           {imageUrls.map((url, idx) => (
             <div key={idx} className="flex gap-2 items-center">
               <Input
@@ -253,16 +271,35 @@ function AddServiceForm() {
               />
               {url && (
                 <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border">
-                  <img src={url} alt="" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                  <img
+                    src={url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={(e) => (e.currentTarget.style.display = "none")}
+                  />
                 </div>
               )}
               {imageUrls.length > 1 && (
-                <button type="button" onClick={() => setImageUrls(imageUrls.filter((_, i) => i !== idx))} className="text-red-500 p-1">✕</button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setImageUrls(imageUrls.filter((_, i) => i !== idx))
+                  }
+                  className="text-red-500 p-1"
+                >
+                  ✕
+                </button>
               )}
             </div>
           ))}
           {imageUrls.length < 5 && (
-            <button type="button" onClick={() => setImageUrls([...imageUrls, ''])} className="text-sm text-primary">+ Add another image</button>
+            <button
+              type="button"
+              onClick={() => setImageUrls([...imageUrls, ""])}
+              className="text-sm text-primary"
+            >
+              + Add another image
+            </button>
           )}
         </div>
 
@@ -291,12 +328,8 @@ function AddServiceForm() {
           >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            loading={loading}
-            className="w-2/3 h-12"
-          >
-            {serviceId ? 'Update Service' : 'List Service'}
+          <Button type="submit" loading={loading} className="w-2/3 h-12">
+            {serviceId ? "Update Service" : "List Service"}
           </Button>
         </div>
       </form>
@@ -313,11 +346,13 @@ function AddServiceForm() {
 
 export default function AddServicePage() {
   return (
-    <Suspense fallback={
-      <div className="mx-auto max-w-3xl py-12 px-6 text-center text-sm text-gray-500">
-        Loading service listing form...
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-3xl py-12 px-6 text-center text-sm text-gray-500">
+          Loading service listing form...
+        </div>
+      }
+    >
       <AddServiceForm />
     </Suspense>
   );

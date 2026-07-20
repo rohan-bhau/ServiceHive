@@ -1,29 +1,32 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Skeleton from '@/components/ui/Skeleton';
-import ErrorState from '@/components/ui/ErrorState';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import Rating from '@/components/ui/Rating';
-import Avatar from '@/components/ui/Avatar';
-import Badge from '@/components/ui/Badge';
-import Input from '@/components/ui/Input';
-import Select from '@/components/ui/Select';
-import ServiceCard from '@/components/services/ServiceCard';
-import type { Service } from '@/types';
-import { useAuth } from '@/lib/auth';
-import { showToast, formatPrice } from '@/lib/utils';
+"use client";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import Skeleton from "@/components/ui/Skeleton";
+import ErrorState from "@/components/ui/ErrorState";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Rating from "@/components/ui/Rating";
+import Avatar from "@/components/ui/Avatar";
+import Badge from "@/components/ui/Badge";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import ServiceCard from "@/components/services/ServiceCard";
+import type { Service } from "@/types";
+import { useAuth } from "@/lib/auth";
+import { showToast, formatPrice } from "@/lib/utils";
 import {
   useGetServiceByIdQuery,
   useGetRelatedServicesQuery,
   useTrackViewMutation,
   useTrackSaveMutation,
-} from '@/store/api/servicesApi';
-import { useGetReviewsQuery, useCreateReviewMutation } from '@/store/api/reviewsApi';
-import { useCreateBookingMutation } from '@/store/api/bookingsApi';
-import { useGetRecommendationsQuery } from '@/store/api/aiApi';
+} from "@/store/api/servicesApi";
+import {
+  useGetReviewsQuery,
+  useCreateReviewMutation,
+} from "@/store/api/reviewsApi";
+import { useCreateBookingMutation } from "@/store/api/bookingsApi";
+import { useGetRecommendationsQuery } from "@/store/api/aiApi";
 import {
   CalendarIcon,
   MapPinIcon,
@@ -31,28 +34,36 @@ import {
   TagIcon,
   SparklesIcon,
   BookmarkIcon,
-} from '@heroicons/react/24/outline';
-import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
+} from "@heroicons/react/24/outline";
+import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 
 export default function ServiceDetailPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
 
-  const [bookingDate, setBookingDate] = useState('');
-  const [bookingNotes, setBookingNotes] = useState('');
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingNotes, setBookingNotes] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState('');
+  const [reviewComment, setReviewComment] = useState("");
   const [saved, setSaved] = useState(false);
 
   // Queries & Mutations
-  const { data: serviceData, isLoading: isServiceLoading, error: serviceError } = useGetServiceByIdQuery(id);
+  const {
+    data: serviceData,
+    isLoading: isServiceLoading,
+    error: serviceError,
+  } = useGetServiceByIdQuery(id);
   const { data: relatedData } = useGetRelatedServicesQuery(id);
   const { data: reviewsData } = useGetReviewsQuery(id);
-  const { data: recommendationsData } = useGetRecommendationsQuery(undefined, { skip: !isAuthenticated });
+  const { data: recommendationsData } = useGetRecommendationsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
-  const [createBooking, { isLoading: isBookingLoading }] = useCreateBookingMutation();
-  const [createReview, { isLoading: isReviewLoading }] = useCreateReviewMutation();
+  const [createBooking, { isLoading: isBookingLoading }] =
+    useCreateBookingMutation();
+  const [createReview, { isLoading: isReviewLoading }] =
+    useCreateReviewMutation();
   const [trackView] = useTrackViewMutation();
   const [trackSave, { isLoading: isSaving }] = useTrackSaveMutation();
 
@@ -63,33 +74,36 @@ export default function ServiceDetailPage() {
   // Track service view logs
   useEffect(() => {
     if (id && isAuthenticated) {
-      trackView(id).unwrap().catch(() => {});
+      trackView(id)
+        .unwrap()
+        .catch(() => {});
     }
   }, [id, isAuthenticated, trackView]);
 
   // Find if this service is in recommendations cache
-  const match = recommendationsData?.recommendations?.find(
-    (r: any) => {
-      const matchId = typeof r.serviceId === 'object' ? r.serviceId._id : r.serviceId;
-      return matchId === id;
-    }
-  );
+  const match = recommendationsData?.recommendations?.find((r: any) => {
+    const matchId =
+      typeof r.serviceId === "object" ? r.serviceId._id : r.serviceId;
+    return matchId === id;
+  });
   const matchScore = match?.score;
   const matchReason = match?.reason;
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      showToast.error('Please log in to book a service');
+      showToast.error("Please log in to book a service");
       router.push(`/login?redirect=/services/${id}`);
       return;
     }
-    if (user?.role === 'provider') {
-      showToast.error('Booking services requires a customer account. Please sign in with a customer account.');
+    if (user?.role === "provider") {
+      showToast.error(
+        "Booking services requires a customer account. Please sign in with a customer account.",
+      );
       return;
     }
     if (!bookingDate) {
-      showToast.error('Please select a date');
+      showToast.error("Please select a date");
       return;
     }
 
@@ -99,19 +113,19 @@ export default function ServiceDetailPage() {
         date: bookingDate,
         notes: bookingNotes,
       }).unwrap();
-      showToast.success('Booking requested successfully!');
-      setBookingDate('');
-      setBookingNotes('');
-      router.push('/dashboard');
+      showToast.success("Booking requested successfully!");
+      setBookingDate("");
+      setBookingNotes("");
+      router.push("/dashboard");
     } catch (err: any) {
-      showToast.error(err?.data?.message || 'Failed to request booking');
+      showToast.error(err?.data?.message || "Failed to request booking");
     }
   };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewComment.trim()) {
-      showToast.error('Please write a review comment');
+      showToast.error("Please write a review comment");
       return;
     }
 
@@ -121,17 +135,17 @@ export default function ServiceDetailPage() {
         rating: reviewRating,
         comment: reviewComment,
       }).unwrap();
-      showToast.success('Review posted successfully!');
-      setReviewComment('');
+      showToast.success("Review posted successfully!");
+      setReviewComment("");
       setReviewRating(5);
     } catch (err: any) {
-      showToast.error(err?.data?.message || 'Failed to post review');
+      showToast.error(err?.data?.message || "Failed to post review");
     }
   };
 
   const handleSaveService = async () => {
     if (!isAuthenticated) {
-      showToast.error('Please log in to save services');
+      showToast.error("Please log in to save services");
       router.push(`/login?redirect=/services/${id}`);
       return;
     }
@@ -139,9 +153,9 @@ export default function ServiceDetailPage() {
     try {
       await trackSave(id).unwrap();
       setSaved(true);
-      showToast.success('Service saved to your bookmarks!');
+      showToast.success("Service saved to your bookmarks!");
     } catch (err: any) {
-      showToast.error(err?.data?.message || 'Failed to save service');
+      showToast.error(err?.data?.message || "Failed to save service");
     }
   };
 
@@ -183,8 +197,13 @@ export default function ServiceDetailPage() {
   if (!service) {
     return (
       <main className="mx-auto max-w-3xl py-16 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 font-display">Service Not Found</h2>
-        <p className="mt-2 text-gray-500">The service listing you are looking for does not exist or has been removed.</p>
+        <h2 className="text-2xl font-bold text-gray-900 font-display">
+          Service Not Found
+        </h2>
+        <p className="mt-2 text-gray-500">
+          The service listing you are looking for does not exist or has been
+          removed.
+        </p>
         <Link href="/explore" className="mt-6 inline-block">
           <Button>Back to Explore</Button>
         </Link>
@@ -209,11 +228,15 @@ export default function ServiceDetailPage() {
               </span>
             )}
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 leading-tight font-display">{service.title}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 leading-tight font-display">
+            {service.title}
+          </h1>
           <div className="flex items-center gap-4">
             <Rating value={service.avgRating} count={service.reviewCount} />
             <span className="text-sm text-gray-300">|</span>
-            <span className="text-sm text-gray-600">Offered by {provider?.name}</span>
+            <span className="text-sm text-gray-600">
+              Offered by {provider?.name}
+            </span>
           </div>
         </div>
 
@@ -229,7 +252,7 @@ export default function ServiceDetailPage() {
             ) : (
               <BookmarkIcon className="h-5 w-5 text-gray-400" />
             )}
-            {saved ? 'Saved' : 'Save Listing'}
+            {saved ? "Saved" : "Save Listing"}
           </Button>
         </div>
       </div>
@@ -246,14 +269,20 @@ export default function ServiceDetailPage() {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <span className="text-6xl text-gray-300 font-bold font-display">{service.category[0]}</span>
+              <span className="text-6xl text-gray-300 font-bold font-display">
+                {service.category[0]}
+              </span>
             )}
           </div>
 
           {/* Service Overview */}
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 font-display">Service Overview</h2>
-            <p className="text-gray-600 text-lg leading-relaxed">{service.shortDescription}</p>
+            <h2 className="text-xl font-bold text-gray-900 font-display">
+              Service Overview
+            </h2>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              {service.shortDescription}
+            </p>
             <hr className="border-gray-100" />
             <div className="prose prose-gray max-w-none text-gray-600 whitespace-pre-line leading-relaxed">
               {service.fullDescription}
@@ -266,14 +295,20 @@ export default function ServiceDetailPage() {
               <ClockIcon className="h-6 w-6 text-primary flex-shrink-0" />
               <div>
                 <h4 className="font-semibold text-gray-900">Availability</h4>
-                <p className="mt-1 text-sm text-gray-600">{service.availability || 'Flexible availability'}</p>
+                <p className="mt-1 text-sm text-gray-600">
+                  {service.availability || "Flexible availability"}
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <MapPinIcon className="h-6 w-6 text-primary flex-shrink-0" />
               <div>
-                <h4 className="font-semibold text-gray-900">Service Location</h4>
-                <p className="mt-1 text-sm text-gray-600">{service.location || 'Online or Client\'s choice'}</p>
+                <h4 className="font-semibold text-gray-900">
+                  Service Location
+                </h4>
+                <p className="mt-1 text-sm text-gray-600">
+                  {service.location || "Online or Client's choice"}
+                </p>
               </div>
             </div>
             {service.tags && service.tags.length > 0 && (
@@ -298,15 +333,23 @@ export default function ServiceDetailPage() {
 
           {/* Provider Card */}
           <div className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 font-display">About the Provider</h3>
+            <h3 className="text-lg font-bold text-gray-900 font-display">
+              About the Provider
+            </h3>
             <div className="flex items-center gap-4">
-              <Avatar name={provider?.name || 'P'} size="lg" />
+              <Avatar name={provider?.name || "P"} size="lg" />
               <div>
-                <h4 className="font-semibold text-gray-900 text-lg">{provider?.name}</h4>
-                <p className="text-sm text-gray-500">Member since {new Date(provider?.createdAt).getFullYear()}</p>
+                <h4 className="font-semibold text-gray-900 text-lg">
+                  {provider?.name}
+                </h4>
+                <p className="text-sm text-gray-500">
+                  Member since {new Date(provider?.createdAt).getFullYear()}
+                </p>
               </div>
             </div>
-            {provider?.bio && <p className="text-gray-600 leading-relaxed">{provider.bio}</p>}
+            {provider?.bio && (
+              <p className="text-gray-600 leading-relaxed">{provider.bio}</p>
+            )}
             {provider?.location && (
               <div className="flex items-center gap-1.5 text-sm text-gray-500">
                 <MapPinIcon className="h-4 w-4" />
@@ -317,11 +360,16 @@ export default function ServiceDetailPage() {
 
           {/* Reviews List */}
           <div className="space-y-6">
-            <h3 className="text-xl font-bold text-gray-900 font-display">Reviews ({reviews.length})</h3>
+            <h3 className="text-xl font-bold text-gray-900 font-display">
+              Reviews ({reviews.length})
+            </h3>
 
             {/* Write Review Form */}
             {isAuthenticated && !isOwner && (
-              <form onSubmit={handleReviewSubmit} className="rounded-2xl border border-primary/10 bg-primary/[0.02] p-6 space-y-4">
+              <form
+                onSubmit={handleReviewSubmit}
+                className="rounded-2xl border border-primary/10 bg-primary/[0.02] p-6 space-y-4"
+              >
                 <h4 className="font-semibold text-gray-900">Write a Review</h4>
                 <div className="flex gap-4 items-center">
                   <span className="text-sm text-gray-600">Your Rating:</span>
@@ -329,11 +377,11 @@ export default function ServiceDetailPage() {
                     value={reviewRating.toString()}
                     onChange={(e) => setReviewRating(parseInt(e.target.value))}
                     options={[
-                      { value: '5', label: '5 Stars' },
-                      { value: '4', label: '4 Stars' },
-                      { value: '3', label: '3 Stars' },
-                      { value: '2', label: '2 Stars' },
-                      { value: '1', label: '1 Star' },
+                      { value: "5", label: "5 Stars" },
+                      { value: "4", label: "4 Stars" },
+                      { value: "3", label: "3 Stars" },
+                      { value: "2", label: "2 Stars" },
+                      { value: "1", label: "1 Star" },
                     ]}
                   />
                 </div>
@@ -347,26 +395,39 @@ export default function ServiceDetailPage() {
                     required
                   />
                 </div>
-                <Button type="submit" loading={isReviewLoading}>Submit Review</Button>
+                <Button type="submit" loading={isReviewLoading}>
+                  Submit Review
+                </Button>
               </form>
             )}
 
             {/* Review Cards list */}
             {reviews.length === 0 ? (
-              <p className="text-gray-500 text-sm">No reviews yet for this listing. Be the first to add one!</p>
+              <p className="text-gray-500 text-sm">
+                No reviews yet for this listing. Be the first to add one!
+              </p>
             ) : (
               <div className="space-y-4">
                 {reviews.map((rev: any) => (
-                  <div key={rev._id} className="border-b border-gray-100 pb-4 space-y-2">
+                  <div
+                    key={rev._id}
+                    className="border-b border-gray-100 pb-4 space-y-2"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Avatar name={rev.userId?.name || 'User'} size="sm" />
-                        <span className="text-sm font-semibold text-gray-900">{rev.userId?.name || 'Customer'}</span>
+                        <Avatar name={rev.userId?.name || "User"} size="sm" />
+                        <span className="text-sm font-semibold text-gray-900">
+                          {rev.userId?.name || "Customer"}
+                        </span>
                       </div>
-                      <span className="text-xs text-gray-400">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(rev.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                     <Rating value={rev.rating} count={0} size="sm" />
-                    <p className="text-sm text-gray-600 leading-relaxed">{rev.comment}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {rev.comment}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -381,13 +442,23 @@ export default function ServiceDetailPage() {
             <Card className="border border-secondary/20 bg-gradient-to-br from-secondary/[0.04] to-primary/[0.02] p-6 space-y-4">
               <div className="flex items-center gap-2 text-secondary">
                 <SparklesIcon className="h-6 w-6 animate-pulse" />
-                <h3 className="font-bold text-lg font-display">AI Smart Match</h3>
+                <h3 className="font-bold text-lg font-display">
+                  AI Smart Match
+                </h3>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-extrabold text-secondary font-display">{matchScore}%</span>
-                <span className="text-sm font-semibold text-gray-500">compatibility</span>
+                <span className="text-4xl font-extrabold text-secondary font-display">
+                  {matchScore}%
+                </span>
+                <span className="text-sm font-semibold text-gray-500">
+                  compatibility
+                </span>
               </div>
-              {matchReason && <p className="text-sm text-gray-600 leading-relaxed">{matchReason}</p>}
+              {matchReason && (
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {matchReason}
+                </p>
+              )}
             </Card>
           )}
 
@@ -401,9 +472,16 @@ export default function ServiceDetailPage() {
 
             {isOwner ? (
               <div className="rounded-xl bg-gray-50 p-4 text-center">
-                <p className="text-sm text-gray-600 font-medium">This is your service listing.</p>
-                <Link href={`/services/add?id=${id}`} className="mt-3 block">
-                  <Button variant="outline" className="w-full">Edit Listing</Button>
+                <p className="text-sm text-gray-600 font-medium">
+                  This is your service listing.
+                </p>
+                <Link
+                  href={`/provider/services/add?id=${id}`}
+                  className="mt-3 block"
+                >
+                  <Button variant="outline" className="w-full">
+                    Edit Listing
+                  </Button>
                 </Link>
               </div>
             ) : (
@@ -413,11 +491,13 @@ export default function ServiceDetailPage() {
                   type="date"
                   value={bookingDate}
                   onChange={(e) => setBookingDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
                   required
                 />
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Reservation Notes</label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">
+                    Reservation Notes
+                  </label>
                   <textarea
                     rows={3}
                     placeholder="Provide details about your needs (e.g. details, size of space, specific topics)..."
@@ -426,7 +506,11 @@ export default function ServiceDetailPage() {
                     className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
-                <Button type="submit" loading={isBookingLoading} className="w-full h-12">
+                <Button
+                  type="submit"
+                  loading={isBookingLoading}
+                  className="w-full h-12"
+                >
                   Request Booking
                 </Button>
               </form>
@@ -438,7 +522,9 @@ export default function ServiceDetailPage() {
       {/* Related Services */}
       {relatedServices.length > 0 && (
         <div className="pt-8 border-t border-gray-100 space-y-6">
-          <h3 className="text-2xl font-bold text-gray-900 font-display">Related Services</h3>
+          <h3 className="text-2xl font-bold text-gray-900 font-display">
+            Related Services
+          </h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {relatedServices.slice(0, 4).map((relService: Service) => (
               <ServiceCard key={relService._id} service={relService} />

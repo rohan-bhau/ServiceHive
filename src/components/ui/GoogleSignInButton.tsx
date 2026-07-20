@@ -65,5 +65,5 @@ export default function GoogleSignInButton({ label = 'Continue with Google' }: P
     document.body.appendChild(script);
   }, []);
 
-  return <div ref={btnRef} className="flex w-full justify-center" />;
+  return <div ref={btnRef} className="flex  w-full justify-center" />;
 }
