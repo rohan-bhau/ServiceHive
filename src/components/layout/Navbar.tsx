@@ -49,12 +49,14 @@ export default function Navbar() {
     ? [
         ...(user.role === 'admin'
           ? [{ href: '/admin/dashboard', label: 'Dashboard' }]
-          : [{ href: '/dashboard', label: 'Dashboard' }]
+          : user.role === 'provider'
+          ? [{ href: '/provider/dashboard', label: 'Dashboard' }]
+          : [{ href: '/customer/dashboard', label: 'Dashboard' }]
         ),
         ...(user.role === 'provider'
           ? [
-              { href: '/services/add', label: 'Add Service' },
-              { href: '/services/manage', label: 'Manage' },
+              { href: '/provider/services/add', label: 'Add Service' },
+              { href: '/provider/services/manage', label: 'Manage' },
             ]
           : []),
       ]
@@ -139,7 +141,7 @@ export default function Navbar() {
                           My Profile
                         </Link>
                         <Link
-                          href={user?.role === 'admin' ? '/admin/dashboard' : '/dashboard'}
+                          href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'provider' ? '/provider/dashboard' : '/customer/dashboard'}
                           onClick={() => setDropdownOpen(false)}
                           className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         >
