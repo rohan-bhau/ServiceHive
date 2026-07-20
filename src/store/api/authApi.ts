@@ -43,6 +43,16 @@ export const authApi = baseApi.injectEndpoints({
         } catch { }
       },
     }),
+    demoProviderLogin: builder.mutation({
+      query: () => ({ url: '/auth/demo/provider', method: 'POST' }),
+      transformResponse: (response: any) => response.user,
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setUser(data));
+        } catch { }
+      },
+    }),
     logout: builder.mutation({
       query: () => ({ url: '/auth/logout', method: 'POST' }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
@@ -81,6 +91,7 @@ export const {
   useLoginMutation,
   useGoogleLoginMutation,
   useDemoLoginMutation,
+  useDemoProviderLoginMutation,
   useLogoutMutation,
   useGetMeQuery,
   useUpdateProfileMutation,

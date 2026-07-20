@@ -10,7 +10,8 @@ export const servicesApi = baseApi.injectEndpoints({
         return rest;
       },
       merge: (currentCache, newItems, { arg }) => {
-        if (arg.page === 1) return newItems;
+        const pageNum = arg.page ? parseInt(arg.page) : 1;
+        if (pageNum <= 1) return newItems;
         return {
           ...newItems,
           services: [...currentCache.services, ...newItems.services],

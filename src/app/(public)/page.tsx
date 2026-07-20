@@ -83,6 +83,7 @@ export default function HomePage() {
   const { data: servicesData, isLoading: isServicesLoading, error: servicesError } = useGetServicesQuery({
     sort: 'rating',
     limit: 4,
+    page: 1,
   });
   const { data: recommendationsData, error: recsError } = useGetRecommendationsQuery(undefined, {
     skip: !isAuthenticated,

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import GoogleSignInButton from '@/components/ui/GoogleSignInButton';
-import { useLoginMutation, useDemoLoginMutation } from '@/store/api/authApi';
+import { useLoginMutation, useDemoLoginMutation, useDemoProviderLoginMutation } from '@/store/api/authApi';
 import { showToast } from '@/lib/utils';
 
 export default function LoginForm() {
@@ -15,6 +15,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [login, { isLoading }] = useLoginMutation();
   const [demoLogin, { isLoading: isDemoLoading }] = useDemoLoginMutation();
+  const [demoProviderLogin, { isLoading: isDemoProviderLoading }] = useDemoProviderLoginMutation();
 
   const redirectTo = searchParams.get('redirect') || '/dashboard';
 
@@ -32,10 +33,20 @@ export default function LoginForm() {
   const handleDemoLogin = async () => {
     try {
       await demoLogin(undefined).unwrap();
-      showToast.success('Logged in as demo user');
+      showToast.success('Logged in as demo customer');
       router.push('/dashboard');
     } catch (err: any) {
       showToast.error(err?.data?.message || 'Demo login failed');
+    }
+  };
+
+  const handleDemoProviderLogin = async () => {
+    try {
+      await demoProviderLogin(undefined).unwrap();
+      showToast.success('Logged in as demo provider');
+      router.push('/dashboard');
+    } catch (err: any) {
+      showToast.error(err?.data?.message || 'Demo provider login failed');
     }
   };
 
@@ -59,8 +70,11 @@ export default function LoginForm() {
             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
             <div className="relative flex justify-center text-sm"><span className="bg-white px-2 text-gray-500">or</span></div>
           </div>
-          <Button type="button" variant="ghost" loading={isDemoLoading} onClick={handleDemoLogin} className="w-full" aria-label="Login with demo account">
-            Demo Login (One Click)
+          <Button type="button" variant="ghost" loading={isDemoLoading} onClick={handleDemoLogin} className="w-full" aria-label="Login with demo customer account">
+            Demo Customer (One Click)
+          </Button>
+          <Button type="button" variant="ghost" loading={isDemoProviderLoading} onClick={handleDemoProviderLogin} className="w-full" aria-label="Login with demo provider account">
+            Demo Provider (One Click)
           </Button>
           <p className="text-center text-sm text-gray-600">
             Don&apos;t have an account?{' '}
