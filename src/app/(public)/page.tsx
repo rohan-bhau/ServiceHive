@@ -10,7 +10,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/lib/auth';
 import type { Service } from '@/types';
-import { useGetPlatformStatsQuery, useGetServicesQuery } from '@/store/api/servicesApi';
+import { useGetPlatformStatsQuery, useGetServicesQuery, useGetTestimonialsQuery } from '@/store/api/servicesApi';
 import { useGetRecommendationsQuery } from '@/store/api/aiApi';
 import {
   WrenchScrewdriverIcon,
@@ -86,6 +86,7 @@ export default function HomePage() {
   const { data: recommendationsData } = useGetRecommendationsQuery(undefined, {
     skip: !isAuthenticated,
   });
+  const { data: testimonialsData } = useGetTestimonialsQuery(undefined);
 
   const featuredServices: Service[] = servicesData?.services || [];
   const recommendations = recommendationsData?.recommendations || [];
@@ -352,7 +353,43 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. NEWSLETTER SUBSCRIBE SECTION */}
+      {/* 8. TESTIMONIALS SECTION */}
+      {testimonialsData?.testimonials && testimonialsData.testimonials.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <AnimatedSection className="text-center">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-primary">Testimonials</h2>
+            <p className="mt-3 text-4xl font-bold text-gray-900 font-display">What Our Users Say</p>
+            <p className="mt-3 text-lg text-gray-500">Hear from customers who found their perfect service match</p>
+          </AnimatedSection>
+          <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {testimonialsData.testimonials.map((t: any, i: number) => (
+              <AnimatedSection key={t._id} delay={i * 0.1} direction="up">
+                <div className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+                  <div className="flex items-center gap-1 text-amber-400">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <svg key={star} className={`h-4 w-4 ${star <= t.rating ? 'fill-current' : 'fill-gray-200'}`} viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="mt-4 flex-1 text-sm leading-relaxed text-gray-600 italic">&ldquo;{t.comment}&rdquo;</p>
+                  <div className="mt-6 flex items-center gap-3 border-t border-gray-100 pt-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 text-sm font-bold text-primary">
+                      {(t.userId?.name || 'U')[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{t.userId?.name || 'User'}</p>
+                      <p className="text-xs text-gray-400">{t.serviceId?.title || 'Service'}</p>
+                    </div>
+                  </div>
+                </div>
+              </AnimatedSection>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 9. NEWSLETTER SUBSCRIBE SECTION */}
       <section className="relative overflow-hidden bg-gray-900 py-24">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-gray-900 to-secondary/10" />
         <div className="absolute right-0 top-0 h-64 w-64 translate-x-1/3 -translate-y-1/3 rounded-full bg-primary/10 blur-3xl" />

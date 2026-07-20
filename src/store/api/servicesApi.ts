@@ -55,6 +55,9 @@ export const servicesApi = baseApi.injectEndpoints({
     getPlatformStats: builder.query({
       query: () => '/stats',
     }),
+    getTestimonials: builder.query({
+      query: () => '/stats/testimonials',
+    }),
   }),
 });
 
@@ -69,6 +72,7 @@ export const {
   useTrackViewMutation,
   useTrackSaveMutation,
   useGetPlatformStatsQuery,
+  useGetTestimonialsQuery,
 } = servicesApi;
 
 
