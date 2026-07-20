@@ -6,6 +6,8 @@ import Select from '@/components/ui/Select';
 import Skeleton from '@/components/ui/Skeleton';
 import { showToast } from '@/lib/utils';
 
+import { useGenerateListingMutation } from '@/store/api/aiApi';
+
 interface ContentGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,28 +18,21 @@ export default function ContentGeneratorModal({ isOpen, onClose, onUse }: Conten
   const [bullets, setBullets] = useState('');
   const [tone, setTone] = useState('professional');
   const [length, setLength] = useState('medium');
-  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ shortDescription: string; fullDescription: string } | null>(null);
+
+  const [generateListing, { isLoading }] = useGenerateListingMutation();
 
   const handleGenerate = async () => {
     if (!bullets.trim()) {
       showToast.error('Please enter some bullet points');
       return;
     }
-    setLoading(true);
     setResult(null);
     try {
-      const res = await fetch('/api/ai/generate-listing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bullets, tone, length }),
-      });
-      const data = await res.json();
+      const data = await generateListing({ bullets, tone, length }).unwrap();
       setResult(data);
     } catch {
       showToast.error('Failed to generate content');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -83,10 +78,10 @@ export default function ContentGeneratorModal({ isOpen, onClose, onUse }: Conten
             ]}
           />
         </div>
-        <Button onClick={handleGenerate} loading={loading} className="w-full">
+        <Button onClick={handleGenerate} loading={isLoading} className="w-full">
           Generate
         </Button>
-        {loading && (
+        {isLoading && (
           <div className="space-y-2">
             <Skeleton height="60px" />
             <Skeleton height="100px" />

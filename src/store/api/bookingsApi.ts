@@ -3,7 +3,7 @@ import { baseApi } from './baseApi';
 export const bookingsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBookings: builder.query({
-      query: (params) => ({ url: '/bookings', params }),
+      query: () => '/bookings/mine',
       providesTags: ['Bookings'],
     }),
     createBooking: builder.mutation({
@@ -14,7 +14,15 @@ export const bookingsApi = baseApi.injectEndpoints({
       query: () => '/bookings/stats',
       providesTags: ['Bookings'],
     }),
+    updateBookingStatus: builder.mutation({
+      query: ({ id, status }) => ({
+        url: `/bookings/${id}`,
+        method: 'PATCH',
+        body: { status },
+      }),
+      invalidatesTags: ['Bookings'],
+    }),
   }),
 });
 
-export const { useGetBookingsQuery, useCreateBookingMutation, useGetBookingStatsQuery } = bookingsApi;
+export const { useGetBookingsQuery, useCreateBookingMutation, useGetBookingStatsQuery, useUpdateBookingStatusMutation } = bookingsApi;

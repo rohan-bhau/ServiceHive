@@ -1,8 +1,17 @@
+'use client';
 import Link from 'next/link';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import HeroSearch from '@/components/ui/HeroSearch';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
 import NewsletterForm from '@/components/ui/NewsletterForm';
+import ServiceCard from '@/components/services/ServiceCard';
+import Skeleton from '@/components/ui/Skeleton';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth';
+import type { Service } from '@/types';
+import { useGetPlatformStatsQuery, useGetServicesQuery } from '@/store/api/servicesApi';
+import { useGetRecommendationsQuery } from '@/store/api/aiApi';
 import {
   WrenchScrewdriverIcon,
   AcademicCapIcon,
@@ -33,13 +42,6 @@ const STEPS = [
   { number: '02', title: 'AI Matches You', desc: 'Our engine recommends the best providers for your specific needs.' },
   { number: '03', title: 'Book with Confidence', desc: 'Compare profiles, read reviews, and schedule securely.' },
   { number: '04', title: 'Share Feedback', desc: 'Leave a review and help the community make informed choices.' },
-];
-
-const STATS = [
-  { value: 1200, suffix: '+', label: 'Providers Onboarded' },
-  { value: 8500, suffix: '+', label: 'Services Completed' },
-  { value: 4.8, suffix: '', label: 'Average Rating' },
-  { value: 3400, suffix: '+', label: 'Active Listings' },
 ];
 
 const FEATURES = [
@@ -73,12 +75,36 @@ const FEATURES = [
 ];
 
 export default function HomePage() {
+  const { isAuthenticated } = useAuth();
+
+  // Queries
+  const { data: statsData } = useGetPlatformStatsQuery(undefined);
+  const { data: servicesData, isLoading: isServicesLoading } = useGetServicesQuery({
+    sort: 'rating',
+    limit: 4,
+  });
+  const { data: recommendationsData } = useGetRecommendationsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  const featuredServices: Service[] = servicesData?.services || [];
+  const recommendations = recommendationsData?.recommendations || [];
+
+  // Platform metrics computed or defaulted
+  const statsMetrics = [
+    { value: statsData?.providersCount || 5, suffix: '+', label: 'Providers Onboarded' },
+    { value: statsData?.servicesCount || 13, suffix: '+', label: 'Active Listings' },
+    { value: statsData?.averageRating || 4.9, suffix: '', label: 'Average rating' },
+    { value: statsData?.bookingsCount || 12, suffix: '+', label: 'Bookings Completed' },
+  ];
+
   return (
     <main>
+      {/* 1. HERO SECTION */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/[0.04] via-white to-secondary/[0.04]">
         <div className="absolute right-0 top-0 h-[600px] w-[600px] translate-x-1/4 -translate-y-1/4 rounded-full bg-primary/[0.03] blur-3xl" />
         <div className="absolute bottom-0 left-0 h-[400px] w-[400px] -translate-x-1/4 translate-y-1/4 rounded-full bg-secondary/[0.03] blur-3xl" />
-        <div className="mx-auto flex min-h-[90vh] max-w-7xl flex-col items-center gap-12 px-4 py-20 lg:flex-row lg:px-8">
+        <div className="mx-auto flex min-h-[85vh] max-w-7xl flex-col items-center gap-12 px-4 py-16 lg:flex-row lg:px-8">
           <div className="flex-1 text-center lg:text-left">
             <AnimatedSection direction="none">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary">
@@ -87,7 +113,7 @@ export default function HomePage() {
               </div>
             </AnimatedSection>
             <AnimatedSection delay={0.1} direction="none">
-              <h1 className="text-5xl font-bold leading-tight tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
+              <h1 className="text-5xl font-bold leading-tight tracking-tight text-gray-900 sm:text-6xl lg:text-7xl font-display">
                 Find the Perfect{' '}
                 <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                   Local Service
@@ -116,7 +142,7 @@ export default function HomePage() {
                 <span className="inline-flex items-center px-3 py-1.5 text-sm text-gray-400">and more</span>
               </div>
             </AnimatedSection>
-            <AnimatedSection delay={0.5} direction="none" className="mt-10 flex flex-wrap items-center gap-4">
+            <AnimatedSection delay={0.5} direction="none" className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-4">
               <Link
                 href="/explore"
                 className="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98]"
@@ -151,7 +177,7 @@ export default function HomePage() {
                       <div key={i} className="h-7 w-7 rounded-full border-2 border-white bg-gradient-to-br from-primary/80 to-secondary/80" />
                     ))}
                   </div>
-                  <span className="font-medium text-gray-700">2.4k+ active today</span>
+                  <span className="font-medium text-gray-700">ServiceHive Match</span>
                 </div>
               </div>
             </div>
@@ -159,11 +185,12 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 2. POPULAR CATEGORIES */}
       <section className="border-t border-gray-100 bg-gray-50/50">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center">
             <h2 className="text-sm font-semibold uppercase tracking-widest text-primary">Categories</h2>
-            <p className="mt-3 text-4xl font-bold text-gray-900">Browse by Category</p>
+            <p className="mt-3 text-4xl font-bold text-gray-900 font-display">Browse by Category</p>
             <p className="mt-3 text-lg text-gray-500">Find exactly what you need across our specialized categories</p>
           </AnimatedSection>
           <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8">
@@ -176,7 +203,7 @@ export default function HomePage() {
                       <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${cat.bg} transition-transform group-hover:scale-110`}>
                         <Icon className={`h-6 w-6 ${cat.color}`} />
                       </div>
-                      <span className="mt-3 text-center text-xs font-medium text-gray-700">{cat.name}</span>
+                      <span className="mt-3 text-center text-xs font-semibold text-gray-700 line-clamp-1">{cat.name}</span>
                     </div>
                   </Link>
                 </AnimatedSection>
@@ -186,10 +213,76 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 3. FEATURED SERVICES SECTION */}
+      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 space-y-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-primary">Top Rated</h2>
+            <p className="mt-3 text-4xl font-bold text-gray-900 font-display">Featured Services</p>
+            <p className="mt-2 text-lg text-gray-500">Book highly-rated local professionals verified by our community.</p>
+          </div>
+          <Link href="/explore">
+            <Button variant="outline" className="flex items-center gap-2">
+              Browse All Services
+              <ArrowRightIcon className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+
+        {isServicesLoading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="p-4">
+                <Skeleton height="160px" className="rounded-xl" />
+                <Skeleton width="60%" height="16px" className="mt-4" />
+                <Skeleton width="90%" height="24px" className="mt-2" />
+                <Skeleton width="40%" height="16px" className="mt-2" />
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {featuredServices.map((service) => (
+              <ServiceCard key={service._id} service={service} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* 4. RECOMMENDED FOR YOU (AUTHENTICATED ONLY) */}
+      {isAuthenticated && recommendations.length > 0 && (
+        <section className="bg-gradient-to-br from-secondary/[0.03] to-primary/[0.01] border-y border-gray-100 py-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="flex items-center gap-2">
+              <SparklesIcon className="h-6 w-6 text-secondary animate-pulse" />
+              <h2 className="text-3xl font-bold text-gray-900 font-display">Recommended For You</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {recommendations.slice(0, 4).map((rec: any) => {
+                const serviceObj = rec.serviceId;
+                if (!serviceObj) return null;
+                return (
+                  <div key={rec._id} className="relative group">
+                    <div className="absolute top-2 right-2 z-10 rounded-xl bg-secondary/95 px-2 py-0.5 text-xs font-bold text-white shadow-md">
+                      {rec.score}% Match
+                    </div>
+                    <ServiceCard service={serviceObj} />
+                    <p className="mt-2 px-2 text-xs text-secondary font-medium leading-relaxed italic line-clamp-2">
+                      &quot;{rec.reason}&quot;
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 5. HOW IT WORKS */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <AnimatedSection className="text-center">
           <h2 className="text-sm font-semibold uppercase tracking-widest text-primary">How It Works</h2>
-          <p className="mt-3 text-4xl font-bold text-gray-900">Four Simple Steps</p>
+          <p className="mt-3 text-4xl font-bold text-gray-900 font-display">Four Simple Steps</p>
           <p className="mt-3 text-lg text-gray-500">From finding to booking — we make it effortless</p>
         </AnimatedSection>
         <div className="relative mt-16">
@@ -210,10 +303,11 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 6. PLATFORM STATISTICS */}
       <section className="bg-primary py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            {STATS.map((stat, i) => (
+            {statsMetrics.map((stat, i) => (
               <AnimatedSection key={stat.label} delay={i * 0.1} direction="up">
                 <div className="text-center text-white">
                   <div className="text-4xl font-bold tracking-tight sm:text-5xl">
@@ -227,10 +321,11 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 7. AI HIGHLIGHT FEATURE HIGHLIGHT SECTION */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <AnimatedSection className="text-center">
           <h2 className="text-sm font-semibold uppercase tracking-widest text-primary">AI Features</h2>
-          <p className="mt-3 text-4xl font-bold text-gray-900">Powered by Intelligence</p>
+          <p className="mt-3 text-4xl font-bold text-gray-900 font-display">Powered by Intelligence</p>
           <p className="mt-3 text-lg text-gray-500">Three ways AI makes your experience better</p>
         </AnimatedSection>
         <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -257,6 +352,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 8. NEWSLETTER SUBSCRIBE SECTION */}
       <section className="relative overflow-hidden bg-gray-900 py-24">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-gray-900 to-secondary/10" />
         <div className="absolute right-0 top-0 h-64 w-64 translate-x-1/3 -translate-y-1/3 rounded-full bg-primary/10 blur-3xl" />

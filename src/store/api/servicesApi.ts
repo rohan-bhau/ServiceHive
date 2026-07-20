@@ -37,6 +37,24 @@ export const servicesApi = baseApi.injectEndpoints({
     getRelatedServices: builder.query({
       query: (id) => `/services/${id}/related`,
     }),
+    trackView: builder.mutation({
+      query: (serviceId) => ({
+        url: '/events/view',
+        method: 'POST',
+        body: { serviceId },
+      }),
+    }),
+    trackSave: builder.mutation({
+      query: (serviceId) => ({
+        url: '/events/save',
+        method: 'POST',
+        body: { serviceId },
+      }),
+      invalidatesTags: ['Recommendations'],
+    }),
+    getPlatformStats: builder.query({
+      query: () => '/stats',
+    }),
   }),
 });
 
@@ -48,4 +66,9 @@ export const {
   useDeleteServiceMutation,
   useGetRelatedServicesQuery,
   useLazyGetServicesQuery,
+  useTrackViewMutation,
+  useTrackSaveMutation,
+  useGetPlatformStatsQuery,
 } = servicesApi;
+
+

@@ -3,12 +3,16 @@ import { baseApi } from './baseApi';
 export const reviewsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getReviews: builder.query({
-      query: (params) => ({ url: '/reviews', params }),
+      query: (serviceId) => `/services/${serviceId}/reviews`,
       providesTags: ['Reviews'],
     }),
     createReview: builder.mutation({
-      query: (body) => ({ url: '/reviews', method: 'POST', body }),
-      invalidatesTags: ['Reviews'],
+      query: ({ serviceId, ...body }) => ({
+        url: `/services/${serviceId}/reviews`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Reviews', 'Services'],
     }),
   }),
 });

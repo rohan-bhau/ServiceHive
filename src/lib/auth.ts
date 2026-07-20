@@ -1,8 +1,11 @@
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 import { useGetMeQuery } from '@/store/api/authApi';
 
 export const useAuth = () => {
-  const { data: user, isLoading, isError } = useGetMeQuery(undefined, {
-    skip: typeof window === 'undefined',
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isLoading } = useGetMeQuery(undefined, {
+    skip: typeof window === 'undefined' || isAuthenticated,
   });
-  return { user: user ?? null, isLoading, isAuthenticated: !!user && !isError };
+  return { user, isLoading, isAuthenticated };
 };

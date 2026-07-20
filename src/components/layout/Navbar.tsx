@@ -1,10 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useGetMeQuery, useLogoutMutation } from '@/store/api/authApi';
+import { useAuth } from '@/lib/auth';
+import { useLogoutMutation } from '@/store/api/authApi';
 import Button from '@/components/ui/Button';
 import Avatar from '@/components/ui/Avatar';
 import { showToast } from '@/lib/utils';
@@ -17,14 +18,30 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { data: user, isLoading } = useGetMeQuery(undefined, { skip: typeof window === 'undefined' });
+  const { user, isLoading } = useAuth();
   const [logout] = useLogoutMutation();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+
+    // Close dropdown on click outside
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   const handleLogout = async () => {
     await logout(undefined);
-    showToast.success('Logged out');
+    showToast.success('Logged out successfully');
     router.push('/');
   };
 
@@ -32,18 +49,18 @@ export default function Navbar() {
     ? [
         { href: '/dashboard', label: 'Dashboard' },
         { href: '/services/add', label: 'Add Service' },
-        { href: '/ai/assistant', label: 'AI Assistant' },
-        { href: '/profile', label: 'Profile' },
+        ...(user.role === 'provider' ? [{ href: '/services/manage', label: 'Manage' }] : []),
       ]
     : [];
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="relative text-xl font-bold tracking-tight text-gray-900">
+        <Link href="/" className="relative text-xl font-bold tracking-tight text-gray-900 font-display">
           Service<span className="text-primary">Hive</span>
         </Link>
 
+        {/* Desktop links */}
         <div className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map((link) => {
             const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
@@ -74,17 +91,63 @@ export default function Navbar() {
               </Link>
             );
           })}
-          {!isLoading && (
+          {mounted && !isLoading && (
             <div className="ml-2 flex items-center gap-3">
               {user ? (
-                <>
-                  <button onClick={handleLogout} className="rounded-lg px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:text-red-600">
-                    Logout
+                /* Profile Avatar Dropdown */
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  >
+                    <Avatar
+                      name={user.name}
+                      src={user.avatarUrl}
+                      size="sm"
+                      className="ring-2 ring-white shadow-sm cursor-pointer transition-transform hover:scale-105"
+                    />
                   </button>
-                  <Link href="/profile">
-                    <Avatar name={user.name} src={user.avatarUrl} size="sm" className="ring-2 ring-white shadow-sm cursor-pointer transition-transform hover:scale-105" />
-                  </Link>
-                </>
+                  <AnimatePresence>
+                    {dropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-gray-100 bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none"
+                      >
+                        <div className="px-4 py-2 border-b border-gray-50">
+                          <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
+                          <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                        </div>
+                        <Link
+                          href="/profile"
+                          onClick={() => setDropdownOpen(false)}
+                          className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          My Profile
+                        </Link>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setDropdownOpen(false)}
+                          className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          Dashboard
+                        </Link>
+                        <hr className="border-gray-50" />
+                        <button
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            handleLogout();
+                          }}
+                          className="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          Logout
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ) : (
                 <Link href="/login">
                   <Button size="sm">Sign In</Button>
@@ -94,6 +157,7 @@ export default function Navbar() {
           )}
         </div>
 
+        {/* Mobile menu trigger */}
         <button
           className="relative z-50 rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 md:hidden"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -103,6 +167,7 @@ export default function Navbar() {
         </button>
       </div>
 
+      {/* Mobile nav panel */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -128,9 +193,26 @@ export default function Navbar() {
                   </Link>
                 );
               })}
+              {user && (
+                <Link
+                  href="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className={`block rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                    pathname === '/profile' ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  My Profile
+                </Link>
+              )}
               <div className="border-t border-gray-100 pt-3">
                 {user ? (
-                  <button onClick={handleLogout} className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50">
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                  >
                     Logout
                   </button>
                 ) : (

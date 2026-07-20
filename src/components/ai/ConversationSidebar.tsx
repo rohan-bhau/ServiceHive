@@ -11,7 +11,8 @@ interface ConversationSidebarProps {
 }
 
 export default function ConversationSidebar({ currentId, onSelect, onNew }: ConversationSidebarProps) {
-  const { data: conversations, isLoading } = useGetConversationsQuery(undefined);
+  const { data, isLoading } = useGetConversationsQuery(undefined);
+  const conversations = data?.conversations || [];
 
   return (
     <div className="flex h-full flex-col border-r bg-white">
@@ -26,7 +27,7 @@ export default function ConversationSidebar({ currentId, onSelect, onNew }: Conv
             {[1, 2, 3].map((i) => <Skeleton key={i} height="48px" />)}
           </div>
         )}
-        {conversations?.map((conv: any) => (
+        {conversations.map((conv: any) => (
           <button
             key={conv._id}
             onClick={() => onSelect(conv._id)}

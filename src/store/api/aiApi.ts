@@ -13,7 +13,17 @@ export const aiApi = baseApi.injectEndpoints({
     generateListing: builder.mutation({
       query: (body) => ({ url: '/ai/generate-listing', method: 'POST', body }),
     }),
+    getRecommendations: builder.query({
+      query: () => '/ai/recommendations',
+      providesTags: ['Recommendations'],
+    }),
   }),
 });
 
-export const { useGetConversationsQuery, useGetConversationByIdQuery, useGenerateListingMutation } = aiApi;
+export const {
+  useGetConversationsQuery,
+  useGetConversationByIdQuery,
+  useGenerateListingMutation,
+  useGetRecommendationsQuery,
+} = aiApi;
+
