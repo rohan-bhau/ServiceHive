@@ -30,6 +30,8 @@ function AddServiceForm() {
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [imageUrls, setImageUrls] = useState<string[]>(['']);
+
   const [form, setForm] = useState({
     title: '',
     shortDescription: '',
@@ -104,6 +106,7 @@ function AddServiceForm() {
       city: form.city,
       tags: tagsArray,
       availability: form.availability,
+      images: imageUrls.filter(Boolean),
     };
 
     try {
@@ -233,6 +236,34 @@ function AddServiceForm() {
             onChange={handleChange}
             placeholder="e.g. San Francisco"
           />
+        </div>
+
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-gray-700">Service Images (URLs)</label>
+          {imageUrls.map((url, idx) => (
+            <div key={idx} className="flex gap-2 items-center">
+              <Input
+                placeholder="https://example.com/image.jpg"
+                value={url}
+                onChange={(e) => {
+                  const updated = [...imageUrls];
+                  updated[idx] = e.target.value;
+                  setImageUrls(updated);
+                }}
+              />
+              {url && (
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border">
+                  <img src={url} alt="" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                </div>
+              )}
+              {imageUrls.length > 1 && (
+                <button type="button" onClick={() => setImageUrls(imageUrls.filter((_, i) => i !== idx))} className="text-red-500 p-1">✕</button>
+              )}
+            </div>
+          ))}
+          {imageUrls.length < 5 && (
+            <button type="button" onClick={() => setImageUrls([...imageUrls, ''])} className="text-sm text-primary">+ Add another image</button>
+          )}
         </div>
 
         <Input

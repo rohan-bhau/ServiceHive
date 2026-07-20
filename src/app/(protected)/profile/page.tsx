@@ -13,7 +13,7 @@ export default function ProfilePage() {
   const { user, isLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
-  const [form, setForm] = useState({ name: '', bio: '', location: '', phone: '' });
+  const [form, setForm] = useState({ name: '', bio: '', location: '', phone: '', avatarUrl: '' });
 
   if (isLoading) {
     return (
@@ -37,6 +37,7 @@ export default function ProfilePage() {
       bio: (user as any).bio || '',
       location: (user as any).location || '',
       phone: (user as any).phone || '',
+      avatarUrl: user.avatarUrl || '',
     });
     setIsEditing(true);
   };
@@ -52,6 +53,7 @@ export default function ProfilePage() {
         bio: form.bio,
         location: form.location,
         phone: form.phone,
+        avatarUrl: form.avatarUrl,
       }).unwrap();
       showToast.success('Profile updated');
       setIsEditing(false);
@@ -108,6 +110,12 @@ export default function ProfilePage() {
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             placeholder="+1 (555) 123-4567"
+          />
+          <Input
+            label="Avatar URL"
+            value={form.avatarUrl || ''}
+            onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })}
+            placeholder="https://example.com/avatar.jpg"
           />
           <div className="flex gap-3 pt-2">
             <Button onClick={handleSave} loading={isUpdating}>Save Changes</Button>

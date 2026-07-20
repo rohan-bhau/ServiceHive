@@ -84,6 +84,10 @@ export default function ServiceDetailPage() {
       router.push(`/login?redirect=/services/${id}`);
       return;
     }
+    if (user?.role === 'provider') {
+      showToast.error('Booking services requires a customer account. Please sign in with a customer account.');
+      return;
+    }
     if (!bookingDate) {
       showToast.error('Please select a date');
       return;

@@ -31,6 +31,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [role, setRole] = useState<'customer' | 'provider'>('customer');
   const [register, { isLoading }] = useRegisterMutation();
 
   const strength = useMemo(() => getPasswordStrength(password), [password]);
@@ -48,7 +49,7 @@ export default function RegisterPage() {
       return;
     }
     try {
-      await register({ name, email, password }).unwrap();
+      await register({ name, email, password, role }).unwrap();
       showToast.success('Account created!');
       router.push('/dashboard');
     } catch (err: any) {
@@ -95,6 +96,17 @@ export default function RegisterPage() {
           {confirmPassword.length > 0 && password !== confirmPassword && (
             <p className="-mt-4 text-sm text-red-500">Passwords do not match</p>
           )}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">I want to join as</label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value as 'customer' | 'provider')}
+              className="w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              <option value="customer">Customer — I want to hire services</option>
+              <option value="provider">Provider — I want to offer services</option>
+            </select>
+          </div>
           <div className="flex items-start gap-2">
             <input
               id="terms"

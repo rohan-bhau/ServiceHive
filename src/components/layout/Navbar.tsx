@@ -47,9 +47,16 @@ export default function Navbar() {
 
   const authLinks = user
     ? [
-        { href: '/dashboard', label: 'Dashboard' },
-        { href: '/services/add', label: 'Add Service' },
-        ...(user.role === 'provider' ? [{ href: '/services/manage', label: 'Manage' }] : []),
+        ...(user.role === 'admin'
+          ? [{ href: '/admin/dashboard', label: 'Dashboard' }]
+          : [{ href: '/dashboard', label: 'Dashboard' }]
+        ),
+        ...(user.role === 'provider'
+          ? [
+              { href: '/services/add', label: 'Add Service' },
+              { href: '/services/manage', label: 'Manage' },
+            ]
+          : []),
       ]
     : [];
 
@@ -132,7 +139,7 @@ export default function Navbar() {
                           My Profile
                         </Link>
                         <Link
-                          href="/dashboard"
+                          href={user?.role === 'admin' ? '/admin/dashboard' : '/dashboard'}
                           onClick={() => setDropdownOpen(false)}
                           className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         >

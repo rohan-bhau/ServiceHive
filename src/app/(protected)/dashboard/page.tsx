@@ -58,7 +58,7 @@ function ProviderDashboard() {
   const [updateBookingStatus, { isLoading: isUpdating }] = useUpdateBookingStatusMutation();
 
   const myBookings = (bookingsData?.bookings || []).filter(
-    (bk: any) => bk.providerId?._id === user?.userId || bk.providerId === user?.userId
+    (bk: any) => bk.providerId?._id === user?._id || bk.providerId === user?._id
   );
 
   const totalBookings = myBookings.length;
@@ -216,7 +216,7 @@ function CustomerDashboard() {
   const [updateBookingStatus, { isLoading: isUpdating }] = useUpdateBookingStatusMutation();
 
   const myBookings = (bookingsData?.bookings || []).filter(
-    (bk: any) => bk.customerId?._id === user?.userId || bk.customerId === user?.userId
+    (bk: any) => bk.customerId?._id === user?._id || bk.customerId === user?._id
   );
   const recommendedList = recommendationsData?.recommendations || [];
 
