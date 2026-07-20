@@ -12,7 +12,7 @@ interface ServiceCardProps {
 }
 
 export default function ServiceCard({ service, className }: ServiceCardProps) {
-  const providerName = typeof service.providerId === 'object' ? service.providerId.name : 'Provider';
+  const providerName = service.providerId && typeof service.providerId === 'object' ? service.providerId.name : 'Provider';
 
   return (
     <Link href={`/services/${service._id}`}>

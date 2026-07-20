@@ -12,8 +12,8 @@ import { showToast } from '@/lib/utils';
 const roleNavLinks: Record<string, { href: string; label: string }[]> = {
   admin: [
     { href: '/admin/dashboard', label: 'Platform Overview' },
-    { href: '/admin/dashboard?tab=users', label: 'Users' },
-    { href: '/admin/dashboard?tab=services', label: 'Pending Services' },
+    { href: '/admin/users', label: 'Users' },
+    { href: '/admin/services', label: 'Pending Services' },
     { href: '/profile', label: 'Profile' },
   ],
   provider: [
