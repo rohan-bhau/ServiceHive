@@ -89,14 +89,13 @@ export default function ChatWindow({ conversationId, onConversationCreated }: Ch
               
               if (data.chunk || data.content) {
                 const textChunk = data.chunk || data.content;
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  const last = updated[updated.length - 1];
-                  if (last.role === 'assistant') {
-                    last.content += textChunk;
-                  }
-                  return updated;
-                });
+                setMessages((prev) =>
+                  prev.map((msg, idx) =>
+                    idx === prev.length - 1 && msg.role === 'assistant'
+                      ? { ...msg, content: msg.content + textChunk }
+                      : msg
+                  )
+                );
               }
               
               if (data.suggestions) {
@@ -108,14 +107,13 @@ export default function ChatWindow({ conversationId, onConversationCreated }: Ch
               }
 
               if (data.error) {
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  const last = updated[updated.length - 1];
-                  if (last.role === 'assistant') {
-                    last.content = data.error;
-                  }
-                  return updated;
-                });
+                setMessages((prev) =>
+                  prev.map((msg, idx) =>
+                    idx === prev.length - 1 && msg.role === 'assistant'
+                      ? { ...msg, content: data.error }
+                      : msg
+                  )
+                );
                 setStreaming(false);
               }
 
@@ -128,14 +126,13 @@ export default function ChatWindow({ conversationId, onConversationCreated }: Ch
       }
       setStreaming(false);
     } catch {
-      setMessages((prev) => {
-        const updated = [...prev];
-        const last = updated[updated.length - 1];
-        if (last.role === 'assistant') {
-          last.content = 'Sorry, I encountered an issue generating a response. Please check your connection and try again.';
-        }
-        return updated;
-      });
+      setMessages((prev) =>
+        prev.map((msg, idx) =>
+          idx === prev.length - 1 && msg.role === 'assistant'
+            ? { ...msg, content: 'Sorry, I encountered an issue generating a response. Please check your connection and try again.' }
+            : msg
+        )
+      );
       setStreaming(false);
     }
   };

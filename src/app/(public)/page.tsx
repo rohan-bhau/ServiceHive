@@ -340,7 +340,7 @@ export default function HomePage() {
           {FEATURES.map((feature, i) => {
             const Icon = feature.icon;
             return (
-              <AnimatedSection key={feature.title} delay={i * 0.1} direction="up">
+              <AnimatedSection key={feature.title} delay={i * 0.1} direction="up" className="h-full">
                 <Link href={feature.link} className="group block h-full">
                   <div className={`flex h-full flex-col rounded-2xl border ${feature.borderColor} bg-gradient-to-br ${feature.gradient} p-8 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg`}>
                     <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm ${feature.iconColor}`}>
