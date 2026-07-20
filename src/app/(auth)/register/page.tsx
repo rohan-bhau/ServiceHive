@@ -111,7 +111,7 @@ export default function RegisterPage() {
             </label>
           </div>
           <Button type="submit" disabled={!isValid} loading={isLoading} className="w-full">Create Account</Button>
-          <div className="relative">
+          <div className="relative" role="separator" aria-label="or sign up with">
             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
             <div className="relative flex justify-center text-sm"><span className="bg-white px-2 text-gray-500">or sign up with</span></div>
           </div>

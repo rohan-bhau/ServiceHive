@@ -68,7 +68,7 @@ export default function Footer() {
           {FOOTER_LINKS.map((group) => (
             <div key={group.title}>
               <h3 className="text-sm font-semibold text-gray-900">{group.title}</h3>
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-4 space-y-3" aria-label={`${group.title} links`}>
                 {group.links.map((link) => (
                   <li key={link.label}>
                     <Link href={link.href} className="text-sm text-gray-500 transition-colors hover:text-gray-900">

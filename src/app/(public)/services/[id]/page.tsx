@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Skeleton from '@/components/ui/Skeleton';
+import ErrorState from '@/components/ui/ErrorState';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Rating from '@/components/ui/Rating';
@@ -45,7 +46,7 @@ export default function ServiceDetailPage() {
   const [saved, setSaved] = useState(false);
 
   // Queries & Mutations
-  const { data: serviceData, isLoading: isServiceLoading } = useGetServiceByIdQuery(id);
+  const { data: serviceData, isLoading: isServiceLoading, error: serviceError } = useGetServiceByIdQuery(id);
   const { data: relatedData } = useGetRelatedServicesQuery(id);
   const { data: reviewsData } = useGetReviewsQuery(id);
   const { data: recommendationsData } = useGetRecommendationsQuery(undefined, { skip: !isAuthenticated });
@@ -154,6 +155,22 @@ export default function ServiceDetailPage() {
             <Skeleton height="280px" className="rounded-2xl" />
             <Skeleton height="150px" className="rounded-2xl" />
           </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (serviceError) {
+    return (
+      <main className="mx-auto max-w-3xl py-16 px-4">
+        <ErrorState
+          message="Failed to load this service. It may have been removed or there was a network issue."
+          onRetry={() => window.location.reload()}
+        />
+        <div className="mt-6 text-center">
+          <Link href="/explore">
+            <Button variant="outline">Back to Explore</Button>
+          </Link>
         </div>
       </main>
     );

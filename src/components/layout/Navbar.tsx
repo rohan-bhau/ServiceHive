@@ -54,9 +54,9 @@ export default function Navbar() {
     : [];
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/85 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/85 backdrop-blur-xl" aria-label="Main navigation">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="relative text-xl font-bold tracking-tight text-gray-900 font-display">
+        <Link href="/" className="relative text-xl font-bold tracking-tight text-gray-900 font-display" aria-label="ServiceHive Home">
           Service<span className="text-primary">Hive</span>
         </Link>
 
@@ -98,6 +98,9 @@ export default function Navbar() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
+                    aria-expanded={dropdownOpen}
+                    aria-haspopup="true"
+                    aria-label="User menu"
                     className="flex rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   >
                     <Avatar
@@ -107,7 +110,7 @@ export default function Navbar() {
                       className="ring-2 ring-white shadow-sm cursor-pointer transition-transform hover:scale-105"
                     />
                   </button>
-                  <AnimatePresence>
+                    <AnimatePresence>
                     {dropdownOpen && (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -115,6 +118,7 @@ export default function Navbar() {
                         exit={{ opacity: 0, scale: 0.95, y: -10 }}
                         transition={{ duration: 0.15 }}
                         className="absolute right-0 mt-2 w-48 origin-top-right rounded-xl border border-gray-100 bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none"
+                        role="menu"
                       >
                         <div className="px-4 py-2 border-b border-gray-50">
                           <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
@@ -161,7 +165,9 @@ export default function Navbar() {
         <button
           className="relative z-50 rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 md:hidden"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
         >
           {menuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
         </button>
@@ -176,6 +182,8 @@ export default function Navbar() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             className="overflow-hidden border-t border-gray-100 bg-white md:hidden"
+            id="mobile-menu"
+            role="menu"
           >
             <div className="space-y-1 px-4 pb-6 pt-2">
               {[...NAV_LINKS, ...authLinks].map((link) => {
@@ -184,6 +192,7 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
+                    role="menuitem"
                     onClick={() => setMenuOpen(false)}
                     className={`block rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                       isActive ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50'
@@ -196,6 +205,7 @@ export default function Navbar() {
               {user && (
                 <Link
                   href="/profile"
+                  role="menuitem"
                   onClick={() => setMenuOpen(false)}
                   className={`block rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
                     pathname === '/profile' ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50'
@@ -207,6 +217,7 @@ export default function Navbar() {
               <div className="border-t border-gray-100 pt-3">
                 {user ? (
                   <button
+                    role="menuitem"
                     onClick={() => {
                       setMenuOpen(false);
                       handleLogout();
@@ -216,7 +227,7 @@ export default function Navbar() {
                     Logout
                   </button>
                 ) : (
-                  <Link href="/login" onClick={() => setMenuOpen(false)} className="block rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-white">
+                  <Link href="/login" role="menuitem" onClick={() => setMenuOpen(false)} className="block rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-white">
                     Sign In
                   </Link>
                 )}

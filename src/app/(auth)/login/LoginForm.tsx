@@ -50,7 +50,7 @@ export default function LoginForm() {
           <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
           <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
           <Button type="submit" loading={isLoading} className="w-full">Sign In</Button>
-          <div className="relative">
+          <div className="relative" role="separator" aria-label="or continue with">
             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
             <div className="relative flex justify-center text-sm"><span className="bg-white px-2 text-gray-500">or continue with</span></div>
           </div>
@@ -59,7 +59,7 @@ export default function LoginForm() {
             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
             <div className="relative flex justify-center text-sm"><span className="bg-white px-2 text-gray-500">or</span></div>
           </div>
-          <Button type="button" variant="ghost" loading={isDemoLoading} onClick={handleDemoLogin} className="w-full">
+          <Button type="button" variant="ghost" loading={isDemoLoading} onClick={handleDemoLogin} className="w-full" aria-label="Login with demo account">
             Demo Login (One Click)
           </Button>
           <p className="text-center text-sm text-gray-600">

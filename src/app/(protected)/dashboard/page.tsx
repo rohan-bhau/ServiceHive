@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Skeleton from '@/components/ui/Skeleton';
+import ErrorState from '@/components/ui/ErrorState';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
@@ -34,15 +35,15 @@ export default function DashboardPage() {
   const isProvider = user?.role === 'provider';
 
   // Customer Queries
-  const { data: bookingsData, isLoading: isBookingsLoading } = useGetBookingsQuery(undefined, {
+  const { data: bookingsData, isLoading: isBookingsLoading, error: bookingsError } = useGetBookingsQuery(undefined, {
     skip: isProvider || !user,
   });
-  const { data: recommendationsData, isLoading: isRecsLoading } = useGetRecommendationsQuery(undefined, {
+  const { data: recommendationsData, isLoading: isRecsLoading, error: recsError } = useGetRecommendationsQuery(undefined, {
     skip: isProvider || !user,
   });
 
   // Provider Queries
-  const { data: statsData, isLoading: isStatsLoading } = useGetBookingStatsQuery(undefined, {
+  const { data: statsData, isLoading: isStatsLoading, error: statsError } = useGetBookingStatsQuery(undefined, {
     skip: !isProvider || !user,
   });
 
@@ -79,6 +80,17 @@ export default function DashboardPage() {
 
   // --- 1. PROVIDER VIEW PANEL ---
   if (isProvider) {
+    if (statsError) {
+      return (
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <ErrorState
+            message="Could not load your dashboard analytics. Please try again."
+            onRetry={() => window.location.reload()}
+          />
+        </main>
+      );
+    }
+
     const stats = statsData || { bookingsOverTime: [], revenueByCategory: [], ratingTrend: [], statusBreakdown: [] };
     
     // Aggregate core numbers
@@ -140,6 +152,17 @@ export default function DashboardPage() {
   // --- 2. CUSTOMER VIEW PANEL ---
   const myBookings = bookingsData?.bookings || [];
   const recommendedList = recommendationsData?.recommendations || [];
+
+  if (bookingsError && recsError) {
+    return (
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <ErrorState
+          message="Could not load your dashboard data. Please try again."
+          onRetry={() => window.location.reload()}
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">

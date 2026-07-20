@@ -6,6 +6,7 @@ import AnimatedCounter from '@/components/ui/AnimatedCounter';
 import NewsletterForm from '@/components/ui/NewsletterForm';
 import ServiceCard from '@/components/services/ServiceCard';
 import Skeleton from '@/components/ui/Skeleton';
+import ErrorState from '@/components/ui/ErrorState';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/lib/auth';
@@ -78,15 +79,15 @@ export default function HomePage() {
   const { isAuthenticated } = useAuth();
 
   // Queries
-  const { data: statsData } = useGetPlatformStatsQuery(undefined);
-  const { data: servicesData, isLoading: isServicesLoading } = useGetServicesQuery({
+  const { data: statsData, error: statsError } = useGetPlatformStatsQuery(undefined);
+  const { data: servicesData, isLoading: isServicesLoading, error: servicesError } = useGetServicesQuery({
     sort: 'rating',
     limit: 4,
   });
-  const { data: recommendationsData } = useGetRecommendationsQuery(undefined, {
+  const { data: recommendationsData, error: recsError } = useGetRecommendationsQuery(undefined, {
     skip: !isAuthenticated,
   });
-  const { data: testimonialsData } = useGetTestimonialsQuery(undefined);
+  const { data: testimonialsData, error: testimonialsError } = useGetTestimonialsQuery(undefined);
 
   const featuredServices: Service[] = servicesData?.services || [];
   const recommendations = recommendationsData?.recommendations || [];
@@ -241,6 +242,11 @@ export default function HomePage() {
               </Card>
             ))}
           </div>
+        ) : servicesError ? (
+          <ErrorState
+            message="Could not load featured services right now."
+            onRetry={() => window.location.reload()}
+          />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {featuredServices.map((service) => (
@@ -354,7 +360,11 @@ export default function HomePage() {
       </section>
 
       {/* 8. TESTIMONIALS SECTION */}
-      {testimonialsData?.testimonials && testimonialsData.testimonials.length > 0 && (
+      {testimonialsError ? (
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-gray-400">Testimonials unavailable at this time.</p>
+        </section>
+      ) : testimonialsData?.testimonials && testimonialsData.testimonials.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <AnimatedSection className="text-center">
             <h2 className="text-sm font-semibold uppercase tracking-widest text-primary">Testimonials</h2>

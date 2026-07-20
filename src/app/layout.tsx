@@ -35,8 +35,16 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white text-gray-900">
         <Providers>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-xl focus:bg-primary focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none"
+          >
+            Skip to main content
+          </a>
           <Navbar />
-          <div className="flex-1">{children}</div>
+          <div id="main-content" className="flex-1 outline-none" tabIndex={-1}>
+            {children}
+          </div>
           <Footer />
           <FloatingChatWidget />
         </Providers>

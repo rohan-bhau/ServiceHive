@@ -6,6 +6,7 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Rating from '@/components/ui/Rating';
 import Skeleton from '@/components/ui/Skeleton';
+import ErrorState from '@/components/ui/ErrorState';
 import Modal from '@/components/ui/Modal';
 import { useAuth } from '@/lib/auth';
 import { showToast, formatPrice } from '@/lib/utils';
@@ -27,7 +28,7 @@ export default function ManageServicesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Fetch only services matching this provider's ID
-  const { data, isLoading, isFetching } = useGetServicesQuery(
+  const { data, isLoading, isFetching, error } = useGetServicesQuery(
     { providerId: user?._id || '' },
     { skip: !user?._id }
   );
@@ -68,6 +69,17 @@ export default function ManageServicesPage() {
         <Card className="p-6">
           <Skeleton height="300px" />
         </Card>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <ErrorState
+          message="Could not load your services. Please check your connection and try again."
+          onRetry={() => window.location.reload()}
+        />
       </main>
     );
   }

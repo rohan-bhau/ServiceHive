@@ -5,6 +5,7 @@ import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Skeleton from '@/components/ui/Skeleton';
+import ErrorState from '@/components/ui/ErrorState';
 import ServiceCard from '@/components/services/ServiceCard';
 import { useGetServicesQuery } from '@/store/api/servicesApi';
 import type { Service } from '@/types';
@@ -53,7 +54,7 @@ export default function ExplorePage() {
     setPage(1);
   }, [debouncedSearch, category, sort, city, minPrice, maxPrice, minRating]);
 
-  const { data, isLoading, isFetching } = useGetServicesQuery({
+  const { data, isLoading, isFetching, error } = useGetServicesQuery({
     search: debouncedSearch,
     category,
     sort,
@@ -193,6 +194,11 @@ export default function ExplorePage() {
               </Card>
             ))}
           </div>
+        ) : error ? (
+          <ErrorState
+            message="We couldn't load services right now. Please check your connection and try again."
+            onRetry={() => window.location.reload()}
+          />
         ) : services.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 py-16 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-gray-400">

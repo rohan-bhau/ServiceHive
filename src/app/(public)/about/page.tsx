@@ -108,14 +108,14 @@ export default function AboutPage() {
         </div>
         <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-3">
           {TEAM.map((member) => (
-            <div key={member.name} className="rounded-2xl bg-white p-8 text-center shadow-sm">
+            <article key={member.name} className="rounded-2xl bg-white p-8 text-center shadow-sm">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-2xl font-bold text-white">
                 {member.name.split(' ').map((n) => n[0]).join('')}
               </div>
               <h3 className="mt-6 text-lg font-semibold text-gray-900">{member.name}</h3>
               <p className="text-sm font-medium text-primary">{member.role}</p>
               <p className="mt-3 text-sm leading-relaxed text-gray-500">{member.bio}</p>
-            </div>
+            </article>
           ))}
         </div>
       </section>
